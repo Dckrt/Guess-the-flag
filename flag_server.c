@@ -171,23 +171,24 @@ int answer_q(Country *c, const char *q){
 }
 
 void print_board(int *board, int *elim){
+    int remaining=0;
+    for(int i=0;i<BOARD_SIZE;i++) if(!elim[i]) remaining++;
     printf("\n");
-    printf("+==============================================================+\n");
-    printf("|                      FLAG BOARD                             |\n");
-    printf("+==============================================================+\n");
-    for(int r=0;r<10;r++){
-        printf("| ");
-        for(int c=0;c<COLS;c++){
-            int i=r*COLS+c;
-            if(i>=BOARD_SIZE) { printf("%-20s",""); continue; }
-            if(elim[i])
-                printf("%2d.[  %-10s  ]  ",i+1,"ELIMINATED");
-            else
-                printf("%2d.[%s %-10s]  ",i+1,pool[board[i]].emoji,pool[board[i]].name);
+    printf("+----+------------------+----+------------------+----+------------------+----+------------------+----+------------------+\n");
+    printf("| ## |     COUNTRY      | ## |     COUNTRY      | ## |     COUNTRY      | ## |     COUNTRY      | ## |     COUNTRY      |\n");
+    printf("+----+------------------+----+------------------+----+------------------+----+------------------+----+------------------+\n");
+    for(int r=0;r<6;r++){
+        printf("|");
+        for(int c=0;c<5;c++){
+            int i=r*5+c;
+            if(i>=BOARD_SIZE){ printf("    |                  |"); continue; }
+            if(elim[i]) printf(" %2d | ~~~ REMOVED ~~~  |",i+1);
+            else        printf(" %2d | %-16s |",i+1,pool[board[i]].name);
         }
         printf("\n");
     }
-    printf("+==============================================================+\n");
+    printf("+----+------------------+----+------------------+----+------------------+----+------------------+----+------------------+\n");
+    printf("  Remaining: %d / %d flags\n",remaining,BOARD_SIZE);
 }
 
 void print_menu(){
