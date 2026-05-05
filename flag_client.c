@@ -14,76 +14,72 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <time.h>
-#include <locale.h>
 
 #define BUFFER_SIZE 2048
 #define BOARD_SIZE  30
-#define COLS        3
 
 typedef struct {
     char name[32];
-    char emoji[16];
-    int red, blue, green, yellow, white, black, orange, purple;
-    int has_star, has_stars;
-    int has_stripes, has_cross;
+    int red, blue, green, yellow, white, black, orange;
+    int has_star, has_stars, has_stripes, has_cross;
     int has_symbol, has_crescent, has_sun, has_circle;
-    int has_eagle, has_dragon, has_map_outline;
+    int has_eagle, has_dragon;
     int is_tricolor, is_bicolor, is_horizontal, is_vertical;
     int has_union_jack, has_text;
     int in_asia, in_europe, in_africa, in_americas, in_oceania;
 } Country;
 
 Country pool[] = {
-{"Philippines",       "PH",  1,1,0,1, 1,0,0,0,  1,0, 0,0, 1,0,1,0, 0,0,0,  0,0,0,0, 0,0,  1,0,0,0,0},
-{"United States",     "US",  1,1,0,0, 1,0,0,0,  0,1, 1,0, 0,0,0,0, 0,0,0,  0,0,1,0, 0,0,  0,0,0,1,0},
-{"Japan",             "JP",  1,0,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,1, 0,0,0,  0,0,0,0, 0,0,  1,0,0,0,0},
-{"China",             "CN",  1,0,0,1, 0,0,0,0,  0,1, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  1,0,0,0,0},
-{"France",            "FR",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,0,1, 0,0,  0,1,0,0,0},
-{"Germany",           "DE",  1,0,0,1, 0,1,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,1,0, 0,0,  0,1,0,0,0},
-{"Brazil",            "BR",  0,1,1,1, 1,0,0,0,  1,0, 0,0, 1,0,0,1, 0,0,0,  0,0,0,0, 0,0,  0,0,0,1,0},
-{"Canada",            "CA",  1,0,0,0, 1,0,0,0,  0,0, 1,0, 1,0,0,0, 0,0,0,  0,0,0,1, 0,0,  0,0,0,1,0},
-{"Australia",         "AU",  1,1,0,0, 1,0,0,0,  0,1, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 1,0,  0,0,0,0,1},
-{"India",             "IN",  1,1,1,0, 1,0,0,0,  0,0, 0,0, 1,0,0,1, 0,0,0,  1,0,1,0, 0,0,  1,0,0,0,0},
-{"South Korea",       "KR",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 1,0,0,1, 0,0,0,  0,0,0,0, 0,0,  1,0,0,0,0},
-{"Turkey",            "TR",  1,0,0,0, 1,0,0,0,  1,0, 0,1, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  0,1,0,0,0},
-{"Mexico",            "MX",  1,0,1,0, 1,0,0,0,  0,0, 0,0, 1,0,0,0, 1,0,0,  1,0,0,1, 0,0,  0,0,0,1,0},
-{"Italy",             "IT",  1,0,1,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,0,1, 0,0,  0,1,0,0,0},
-{"Spain",             "ES",  1,0,0,1, 0,0,0,0,  0,0, 0,0, 1,0,0,0, 0,0,0,  0,0,1,0, 0,0,  0,1,0,0,0},
-{"Argentina",         "AR",  0,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,1,0, 0,0,0,  0,0,1,0, 0,0,  0,0,0,1,0},
-{"United Kingdom",    "GB",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 1,0,  0,1,0,0,0},
-{"Portugal",          "PT",  1,0,1,1, 0,0,0,0,  0,0, 0,0, 1,0,0,0, 0,0,0,  0,0,0,1, 0,0,  0,1,0,0,0},
-{"Netherlands",       "NL",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,1,0, 0,0,  0,1,0,0,0},
-{"Poland",            "PL",  1,0,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,1,1,0, 0,0,  0,1,0,0,0},
-{"Switzerland",       "CH",  1,0,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  0,1,0,0,0},
-{"Saudi Arabia",      "SA",  1,0,1,0, 1,0,0,0,  0,0, 0,0, 1,0,0,0, 0,0,0,  0,0,0,0, 0,1,  1,0,0,0,0},
-{"Pakistan",          "PK",  1,0,1,0, 1,0,0,0,  1,0, 0,1, 0,0,0,0, 0,0,0,  0,0,0,1, 0,0,  1,0,0,0,0},
-{"Nigeria",           "NG",  0,0,1,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,1, 0,0,  0,0,1,0,0},
-{"Egypt",             "EG",  1,0,0,1, 1,1,0,0,  0,0, 0,0, 1,0,0,0, 1,0,0,  1,0,1,0, 0,0,  0,0,1,0,0},
-{"South Africa",      "ZA",  1,1,1,1, 1,1,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  0,0,1,0,0},
-{"Kenya",             "KE",  1,0,1,0, 1,1,0,0,  0,0, 0,0, 1,0,0,0, 0,0,0,  1,0,1,0, 0,0,  0,0,1,0,0},
-{"Morocco",           "MA",  1,0,1,0, 0,0,0,0,  1,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  0,0,1,0,0},
-{"Sweden",            "SE",  0,1,0,1, 0,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  0,1,0,0,0},
-{"Norway",            "NO",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  0,1,0,0,0},
-{"Denmark",           "DK",  1,0,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  0,1,0,0,0},
-{"Greece",            "GR",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,1,0, 0,0,  0,1,0,0,0},
-{"Ukraine",           "UA",  0,1,0,1, 0,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,1,1,0, 0,0,  0,1,0,0,0},
-{"Thailand",          "TH",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,0,1,0, 0,0,  1,0,0,0,0},
-{"Vietnam",           "VN",  1,0,0,1, 0,0,0,0,  1,0, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 0,0,  1,0,0,0,0},
-{"Indonesia",         "ID",  1,0,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  0,1,1,0, 0,0,  1,0,0,0,0},
-{"Malaysia",          "MY",  1,1,0,1, 1,0,0,0,  0,0, 1,1, 0,0,0,0, 0,0,0,  0,0,1,0, 0,0,  1,0,0,0,0},
-{"New Zealand",       "NZ",  1,1,0,0, 1,0,0,0,  0,1, 0,0, 0,0,0,0, 0,0,0,  0,0,0,0, 1,0,  0,0,0,0,1},
-{"Ireland",           "IE",  1,0,1,1, 1,0,1,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,0,1, 0,0,  0,1,0,0,0},
-{"Belgium",           "BE",  1,0,0,1, 0,1,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,0,1, 0,0,  0,1,0,0,0},
-{"Russia",            "RU",  1,1,0,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,1,0, 0,0,  0,1,0,0,0},
-{"Colombia",          "CO",  1,1,0,1, 0,0,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,1,0, 0,0,  0,0,0,1,0},
-{"Chile",             "CL",  1,1,0,0, 1,0,0,0,  1,0, 0,0, 0,0,0,0, 0,0,0,  0,0,1,0, 0,0,  0,0,0,1,0},
-{"Cuba",              "CU",  1,1,0,0, 1,0,0,0,  1,0, 1,0, 0,0,0,0, 0,0,0,  0,0,1,0, 0,0,  0,0,0,1,0},
-{"Israel",            "IL",  0,1,0,0, 1,0,0,0,  1,0, 0,0, 1,0,0,0, 0,0,0,  0,0,1,0, 0,0,  0,0,0,0,0},
-{"Iran",              "IR",  1,0,1,0, 1,0,0,0,  0,0, 0,0, 1,0,0,0, 0,0,0,  1,0,1,0, 0,1,  1,0,0,0,0},
-{"Iraq",              "IQ",  1,0,1,0, 1,1,0,0,  0,0, 0,0, 0,0,0,0, 0,0,0,  1,0,1,0, 0,1,  1,0,0,0,0},
-{"Ethiopia",          "ET",  1,0,1,1, 0,0,0,0,  1,0, 0,0, 1,0,0,0, 0,0,0,  1,0,1,0, 0,0,  0,0,1,0,0},
-{"Ghana",             "GH",  1,0,1,1, 0,1,0,0,  1,0, 0,0, 0,0,0,0, 0,0,0,  1,0,1,0, 0,0,  0,0,1,0,0},
-{"Wales",             "WA",  1,0,1,0, 1,0,0,0,  0,0, 0,0, 0,0,0,0, 0,1,0,  0,0,1,0, 0,0,  0,1,0,0,0},
+{"Philippines",           1, 1, 0, 1, 1, 0, 0,  1, 0, 0, 0,  1, 0, 1, 0,  0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 0, 0},
+{"United States",         1, 1, 0, 0, 1, 0, 0,  0, 1, 1, 0,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 0, 0, 1, 0},
+{"Japan",                 1, 0, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 1,  0, 0,  0, 1, 0, 0,  0, 0,  1, 0, 0, 0, 0},
+{"China",                 1, 0, 0, 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 0, 0},
+{"France",                1, 1, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 1,  0, 0,  0, 1, 0, 0, 0},
+{"Germany",               1, 0, 0, 1, 0, 1, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Brazil",                0, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0,  1, 0, 0, 1,  0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 1, 0},
+{"Canada",                1, 0, 0, 0, 1, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0,  0, 0, 0, 1,  0, 0,  0, 0, 0, 1, 0},
+{"Australia",             1, 1, 0, 0, 1, 0, 0,  0, 1, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  1, 0,  0, 0, 0, 0, 1},
+{"India",                 1, 1, 1, 0, 1, 0, 0,  0, 0, 0, 0,  1, 0, 0, 1,  0, 0,  1, 0, 1, 0,  0, 0,  1, 0, 0, 0, 0},
+{"South Korea",           1, 1, 0, 0, 1, 0, 0,  0, 0, 0, 0,  1, 0, 0, 1,  0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 0, 0},
+{"Turkey",                1, 0, 0, 0, 1, 0, 0,  1, 0, 0, 1,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Mexico",                1, 0, 1, 0, 1, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  1, 0,  1, 0, 0, 1,  0, 0,  0, 0, 0, 1, 0},
+{"Italy",                 1, 0, 1, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 1,  0, 0,  0, 1, 0, 0, 0},
+{"Spain",                 1, 0, 0, 1, 0, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Argentina",             0, 1, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 1, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 0, 0, 1, 0},
+{"United Kingdom",        1, 1, 0, 0, 1, 0, 0,  0, 0, 0, 1,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  1, 0,  0, 1, 0, 0, 0},
+{"Portugal",              1, 0, 1, 1, 0, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0,  0, 0, 0, 1,  0, 0,  0, 1, 0, 0, 0},
+{"Netherlands",           1, 1, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Poland",                1, 0, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 1, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Switzerland",           1, 0, 0, 0, 1, 0, 0,  0, 0, 0, 1,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Saudi Arabia",          1, 0, 1, 0, 1, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 1,  1, 0, 0, 0, 0},
+{"Pakistan",              1, 0, 1, 0, 1, 0, 0,  1, 0, 0, 1,  0, 0, 0, 0,  0, 0,  0, 0, 0, 1,  0, 0,  1, 0, 0, 0, 0},
+{"Nigeria",               0, 0, 1, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 1,  0, 0,  0, 0, 1, 0, 0},
+{"Egypt",                 1, 0, 0, 1, 1, 1, 0,  0, 0, 0, 0,  1, 0, 0, 0,  1, 0,  1, 0, 1, 0,  0, 0,  0, 0, 1, 0, 0},
+{"South Africa",          1, 1, 1, 1, 1, 1, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0, 0},
+{"Kenya",                 1, 0, 1, 0, 1, 1, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 0,  0, 0, 1, 0, 0},
+{"Morocco",               1, 0, 1, 0, 0, 0, 0,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0, 0},
+{"Sweden",                0, 1, 0, 1, 0, 0, 0,  0, 0, 0, 1,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Norway",                1, 1, 0, 0, 1, 0, 0,  0, 0, 0, 1,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Denmark",               1, 0, 0, 0, 1, 0, 0,  0, 0, 0, 1,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Greece",                1, 1, 0, 0, 1, 0, 0,  0, 0, 1, 1,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Ukraine",               0, 1, 0, 1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 1, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Thailand",              1, 1, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  1, 0, 0, 0, 0},
+{"Vietnam",               1, 0, 0, 1, 0, 0, 0,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 0, 0},
+{"Indonesia",             1, 0, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 1, 1, 0,  0, 0,  1, 0, 0, 0, 0},
+{"Malaysia",              1, 1, 0, 1, 1, 0, 0,  0, 0, 1, 1,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  1, 0, 0, 0, 0},
+{"New Zealand",           1, 1, 0, 0, 1, 0, 0,  0, 1, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 0, 0,  1, 0,  0, 0, 0, 0, 1},
+{"Ireland",               1, 0, 1, 1, 1, 0, 1,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 1,  0, 0,  0, 1, 0, 0, 0},
+{"Belgium",               1, 0, 0, 1, 0, 1, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 0, 1,  0, 0,  0, 1, 0, 0, 0},
+{"Russia",                1, 1, 0, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 0,  0, 1, 0, 0, 0},
+{"Colombia",              1, 1, 0, 1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 0,  0, 0, 0, 1, 0},
+{"Chile",                 1, 1, 0, 0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 0, 0, 1, 0},
+{"Cuba",                  1, 1, 0, 0, 1, 0, 0,  1, 0, 1, 0,  0, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 0, 0, 1, 0},
+{"Israel",                0, 1, 0, 0, 1, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  0, 0,  0, 0, 1, 0,  0, 0,  0, 0, 0, 0, 0},
+{"Iran",                  1, 0, 1, 0, 1, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 1,  1, 0, 0, 0, 0},
+{"Iraq",                  1, 0, 1, 0, 1, 1, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 1,  1, 0, 0, 0, 0},
+{"Ethiopia",              1, 0, 1, 1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 0,  0, 0, 1, 0, 0},
+{"Ghana",                 1, 0, 1, 1, 0, 1, 0,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  1, 0, 1, 0,  0, 0,  0, 0, 1, 0, 0},
+{"Wales",                 1, 0, 1, 0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 1,  0, 0, 1, 0,  0, 0,  0, 1, 0, 0, 0},
 };
 
 char *questions[] = {
@@ -104,11 +100,11 @@ char *questions[] = {
     "Does your flag have a CIRCLE or DOT?",
     "Does your flag have an EAGLE?",
     "Does your flag have a DRAGON?",
-    "Is your flag a TRICOLOR (3 equal bands)?",
-    "Is your flag a BICOLOR (2 equal bands)?",
+    "Is your flag a TRICOLOR? (3 equal bands)",
+    "Is your flag a BICOLOR? (2 equal bands)",
     "Are the bands HORIZONTAL?",
     "Are the bands VERTICAL?",
-    "Does it have the UNION JACK in the corner?",
+    "Does it have the UNION JACK in corner?",
     "Does your flag have TEXT or WRITING?",
     "Is the country in ASIA?",
     "Is the country in EUROPE?",
@@ -121,7 +117,13 @@ char *questions[] = {
 void die_with_error(char *m){printf("%s\n",m);exit(-1);}
 void net_send(int s,const char *m){if(send(s,m,strlen(m),0)<0)die_with_error("send failed");}
 int  net_recv(int s,char *b){bzero(b,BUFFER_SIZE);int n=recv(s,b,BUFFER_SIZE-1,0);if(n<0)die_with_error("recv failed");b[strcspn(b,"\r\n")]='\0';return n;}
-void read_input(char *b){bzero(b,BUFFER_SIZE);fgets(b,BUFFER_SIZE-1,stdin);b[strcspn(b,"\r\n")]='\0';}
+
+void read_input(char *b){
+    bzero(b,BUFFER_SIZE);
+    fflush(stdout);
+    fgets(b,BUFFER_SIZE-1,stdin);
+    b[strcspn(b,"\r\n")]='\0';
+}
 
 int answer_q(Country *c,const char *q){
     char lq[BUFFER_SIZE]; strncpy(lq,q,BUFFER_SIZE-1);
@@ -137,18 +139,18 @@ int answer_q(Country *c,const char *q){
     if(strstr(lq,"star"))     return c->has_star||c->has_stars;
     if(strstr(lq,"strip"))    return c->has_stripes;
     if(strstr(lq,"cross"))    return c->has_cross;
-    if(strstr(lq,"symbol")||strstr(lq,"emblem")||strstr(lq,"coat")) return c->has_symbol;
-    if(strstr(lq,"crescent")||strstr(lq,"moon")) return c->has_crescent;
+    if(strstr(lq,"symbol")||strstr(lq,"emblem")) return c->has_symbol;
+    if(strstr(lq,"crescent")||strstr(lq,"moon"))  return c->has_crescent;
     if(strstr(lq,"sun"))      return c->has_sun;
-    if(strstr(lq,"circle")||strstr(lq,"dot")) return c->has_circle;
+    if(strstr(lq,"circle")||strstr(lq,"dot"))     return c->has_circle;
     if(strstr(lq,"eagle"))    return c->has_eagle;
     if(strstr(lq,"dragon"))   return c->has_dragon;
-    if(strstr(lq,"tricolor")||strstr(lq,"3 equal")||strstr(lq,"three equal")) return c->is_tricolor;
-    if(strstr(lq,"bicolor")||strstr(lq,"2 equal")||strstr(lq,"two equal"))    return c->is_bicolor;
+    if(strstr(lq,"tricolor")||strstr(lq,"3 equal")) return c->is_tricolor;
+    if(strstr(lq,"bicolor")||strstr(lq,"2 equal"))  return c->is_bicolor;
     if(strstr(lq,"horizontal")) return c->is_horizontal;
     if(strstr(lq,"vertical"))   return c->is_vertical;
-    if(strstr(lq,"union jack")||strstr(lq,"uk flag")) return c->has_union_jack;
-    if(strstr(lq,"text")||strstr(lq,"writing")||strstr(lq,"word")) return c->has_text;
+    if(strstr(lq,"union jack")) return c->has_union_jack;
+    if(strstr(lq,"text")||strstr(lq,"writing")) return c->has_text;
     if(strstr(lq,"asia"))     return c->in_asia;
     if(strstr(lq,"europe"))   return c->in_europe;
     if(strstr(lq,"africa"))   return c->in_africa;
@@ -168,7 +170,7 @@ void print_board(int *board,int *elim){
         printf("|");
         for(int c=0;c<5;c++){
             int i=r*5+c;
-            if(i>=BOARD_SIZE){ printf("    |                  |"); continue; }
+            if(i>=BOARD_SIZE){printf("    |                  |");continue;}
             if(elim[i]) printf(" %2d | ~~~ REMOVED ~~~  |",i+1);
             else        printf(" %2d | %-16s |",i+1,pool[board[i]].name);
         }
@@ -206,7 +208,7 @@ void print_menu(){
     printf("|  19. Is your flag a BICOLOR? (2 equal bands)             |\n");
     printf("|  20. Are the bands HORIZONTAL?                           |\n");
     printf("|  21. Are the bands VERTICAL?                             |\n");
-    printf("|  22. Does it have the UNION JACK in the corner?          |\n");
+    printf("|  22. Does it have the UNION JACK in corner?              |\n");
     printf("|  23. Does your flag have TEXT or WRITING?                |\n");
     printf("|  --- LOCATION ---                                        |\n");
     printf("|  24. Is the country in ASIA?                             |\n");
@@ -214,22 +216,94 @@ void print_menu(){
     printf("|  26. Is the country in AFRICA?                           |\n");
     printf("|  27. Is the country in the AMERICAS?                     |\n");
     printf("|  28. Is the country in OCEANIA?                          |\n");
-    printf("|  --                                                      |\n");
+    printf("|  ---                                                     |\n");
     printf("|   0. Type a CUSTOM question                              |\n");
     printf("|  99. GUESS the country name                              |\n");
     printf("+----------------------------------------------------------+\n");
-    printf("Enter number: ");
-    fflush(stdout);
+}
+
+void show_flag_info(Country *c) {
+    printf("\n  +================================================+\n");
+    printf("  |            YOUR SECRET FLAG INFO               |\n");
+    printf("  +================================================+\n");
+
+    /* COLORS */
+    printf("  | COLORS    : ");
+    int any=0;
+    if(c->red)    { printf("RED ");    any=1; }
+    if(c->blue)   { printf("BLUE ");   any=1; }
+    if(c->green)  { printf("GREEN ");  any=1; }
+    if(c->yellow) { printf("YELLOW "); any=1; }
+    if(c->white)  { printf("WHITE ");  any=1; }
+    if(c->black)  { printf("BLACK ");  any=1; }
+    if(c->orange) { printf("ORANGE "); any=1; }
+    if(!any) printf("(none)");
+    printf("\n");
+
+    /* SYMBOLS */
+    printf("  | SYMBOLS   : ");
+    any=0;
+    if(c->has_star)       { printf("1 Star  ");         any=1; }
+    if(c->has_stars)      { printf("Multiple Stars  ");  any=1; }
+    if(c->has_stripes)    { printf("Stripes  ");         any=1; }
+    if(c->has_cross)      { printf("Cross  ");           any=1; }
+    if(c->has_symbol)     { printf("Symbol/Emblem  ");   any=1; }
+    if(c->has_crescent)   { printf("Crescent/Moon  ");   any=1; }
+    if(c->has_sun)        { printf("Sun  ");              any=1; }
+    if(c->has_circle)     { printf("Circle/Dot  ");      any=1; }
+    if(c->has_eagle)      { printf("Eagle  ");            any=1; }
+    if(c->has_dragon)     { printf("Dragon  ");           any=1; }
+    if(c->has_union_jack) { printf("Union Jack  ");      any=1; }
+    if(c->has_text)       { printf("Text/Writing  ");    any=1; }
+    if(!any) printf("(none)");
+    printf("\n");
+
+    /* DESIGN */
+    printf("  | DESIGN    : ");
+    any=0;
+    if(c->is_tricolor)   { printf("Tricolor(3 bands)  ");  any=1; }
+    if(c->is_bicolor)    { printf("Bicolor(2 bands)  ");   any=1; }
+    if(c->is_horizontal) { printf("Horizontal bands  ");   any=1; }
+    if(c->is_vertical)   { printf("Vertical bands  ");     any=1; }
+    if(!any) printf("(no standard band design)");
+    printf("\n");
+
+    /* LOCATION */
+    printf("  | LOCATION  : ");
+    any=0;
+    if(c->in_asia)     { printf("Asia  ");     any=1; }
+    if(c->in_europe)   { printf("Europe  ");   any=1; }
+    if(c->in_africa)   { printf("Africa  ");   any=1; }
+    if(c->in_americas) { printf("Americas  "); any=1; }
+    if(c->in_oceania)  { printf("Oceania  ");  any=1; }
+    if(!any) printf("(unknown)");
+    printf("\n");
+
+    printf("  +================================================+\n\n");
+}
+
+void ask_yesno(char *out){
+    char buf[BUFFER_SIZE];
+    while(1){
+        printf("Your answer (YES/NO): ");
+        read_input(buf);
+        for(int i=0;buf[i];i++) if(buf[i]>='a'&&buf[i]<='z') buf[i]-=32;
+        if(strcmp(buf,"YES")!=0&&strcmp(buf,"NO")!=0){
+            printf("Please type YES or NO only.\n");
+            continue;
+        }
+        strncpy(out,buf,BUFFER_SIZE-1);
+        return;
+    }
 }
 
 int main(int argc,char *argv[]){
     if(argc<3){printf("Usage: %s host port\n",argv[0]);exit(1);}
-    setlocale(LC_ALL,"");
 
     int sock,port;
     struct sockaddr_in saddr;
     struct hostent *server;
-    char buf[BUFFER_SIZE],out[BUFFER_SIZE],question[BUFFER_SIZE];
+    char buf[BUFFER_SIZE],out[BUFFER_SIZE],question[BUFFER_SIZE],answer[BUFFER_SIZE];
 
     printf("+=================================+\n");
     printf("|    GUESS THE FLAG - PLAYER 2    |\n");
@@ -262,28 +336,25 @@ int main(int argc,char *argv[]){
     int my_c=p?atoi(p):0;
     net_send(sock,"ACK");
 
-    printf("Your secret flag (Player 1 must guess): [%s] %s\n",
-        pool[my_c].emoji,pool[my_c].name);
+    printf("Your secret flag (Player 1 must guess): %s\n", pool[my_c].name);
     printf("Player 1's flag: [HIDDEN]\n\n");
 
     int my_elim[BOARD_SIZE]={0};
-    int game_over=0,my_skip=0;
+    int game_over=0, my_skip=0;
 
     print_board(board,my_elim);
 
     while(!game_over){
         net_recv(sock,buf);
 
-        /* SERVER ASKING */
+        /* SERVER ASKING QUESTION */
         if(strncmp(buf,"SERVER_QUESTION|",16)==0){
             char *q=buf+16;
             printf("\n[server] > QUESTION: %s\n",q);
-            printf("Your secret: [%s] %s | Answer (YES/NO): ",
-                pool[my_c].emoji,pool[my_c].name);
-            fflush(stdout);
-            read_input(buf);
-            for(int i=0;buf[i];i++) if(buf[i]>='a'&&buf[i]<='z') buf[i]-=32;
-            snprintf(out,BUFFER_SIZE,"ANSWER|%s",buf);
+            printf("Your secret flag: %s\n",pool[my_c].name);
+            show_flag_info(&pool[my_c]);
+            ask_yesno(answer);
+            snprintf(out,BUFFER_SIZE,"ANSWER|%s",answer);
             net_send(sock,out);
 
         /* SERVER GUESSING */
@@ -294,10 +365,12 @@ int main(int argc,char *argv[]){
                 printf("[Server CORRECT!] Player 1 wins!\n");
                 net_send(sock,"GUESS_RESULT|correct");
                 net_recv(sock,buf);
-                printf("\n*** GAME OVER — Player 1 wins! ***\n");
+                printf("\n+----------------------------------+\n");
+                printf("|  *** GAME OVER - P1 WINS! ***    |\n");
+                printf("+----------------------------------+\n");
                 game_over=1;
             } else {
-                printf("[Server WRONG] They lose next turn.\n");
+                printf("[Server WRONG] They lose their next turn.\n");
                 net_send(sock,"GUESS_RESULT|wrong");
                 net_recv(sock,buf);
                 net_send(sock,"ACK");
@@ -305,7 +378,7 @@ int main(int argc,char *argv[]){
 
         /* SERVER SKIP */
         } else if(strncmp(buf,"SERVER_SKIP",11)==0){
-            printf("\n[Server skipping — wrong guess penalty]\n");
+            printf("\n[Server is skipping — wrong guess penalty]\n");
             net_send(sock,"ACK");
 
         /* MY TURN */
@@ -322,38 +395,38 @@ int main(int argc,char *argv[]){
             printf("|           YOUR TURN              |\n");
             printf("+----------------------------------+\n");
             print_menu();
+            printf("Enter number: ");
             read_input(buf);
             int choice=atoi(buf);
 
             if(choice==99){
-                printf("Enter country name:\n> "); fflush(stdout);
+                printf("Enter country name: ");
                 read_input(buf);
                 snprintf(out,BUFFER_SIZE,"CLIENT_GUESS|%s",buf);
                 net_send(sock,out);
                 net_recv(sock,buf);
                 char *res=strstr(buf,"|"); if(res)res++;
                 if(res&&strcmp(res,"correct")==0){
-                    printf("\n*** CORRECT! YOU WIN! ***\n");
+                    printf("\n+----------------------------------+\n");
+                    printf("|   *** CORRECT! YOU WIN! ***      |\n");
+                    printf("+----------------------------------+\n");
                     net_send(sock,"ACK");
                     net_recv(sock,buf);
                     game_over=1;
                 } else {
-                    printf("[WRONG] You lose your next turn.\n");
+                    printf("[WRONG GUESS] You lose your next turn.\n");
                     my_skip=1;
                     net_send(sock,"ACK");
                 }
             } else {
                 if(choice==0){
-                    printf("Type your question:\n> "); fflush(stdout);
+                    printf("Type your question: ");
                     read_input(question);
                 } else if(choice>=1&&choice<=NUM_Q){
                     strncpy(question,questions[choice-1],BUFFER_SIZE-1);
                     printf("Asking: %s\n",question);
                 } else {
-                    printf("Invalid. Try again.\n");
-                    /* still need to send something to server to avoid deadlock */
-                    /* re-request turn by sending a dummy that server ignores */
-                    /* actually just continue and wait for next CLIENT_TURN */
+                    printf("Invalid choice. Try again.\n");
                     net_send(sock,"CLIENT_QUESTION|invalid");
                     net_recv(sock,buf);
                     continue;
@@ -372,7 +445,7 @@ int main(int argc,char *argv[]){
                             if(m>=0&&((is_yes&&m==0)||(!is_yes&&m==1))){my_elim[i]=1;ec++;}
                         }
                     }
-                    printf("(%d eliminated)\n",ec);
+                    printf("(%d flag(s) eliminated)\n",ec);
                     print_board(board,my_elim);
                 }
             }
@@ -380,10 +453,15 @@ int main(int argc,char *argv[]){
         /* GAME OVER */
         } else if(strncmp(buf,"GAME_OVER|",10)==0){
             char *w=buf+10;
-            if(strcmp(w,"client_wins")==0)
-                printf("\n*** GAME OVER — YOU WIN! ***\n");
-            else
-                printf("\n*** GAME OVER — Player 1 wins! ***\n");
+            if(strcmp(w,"client_wins")==0){
+                printf("\n+----------------------------------+\n");
+                printf("|   *** GAME OVER - YOU WIN! ***   |\n");
+                printf("+----------------------------------+\n");
+            } else {
+                printf("\n+----------------------------------+\n");
+                printf("|  *** GAME OVER - P1 WINS! ***    |\n");
+                printf("+----------------------------------+\n");
+            }
             net_send(sock,"ACK");
             game_over=1;
         }
