@@ -168,47 +168,60 @@ void print_board(int *board,int *elim){
     printf("  Remaining: %d / %d\n",rem,BOARD_SIZE);
 }
 void show_flag_info(Country *c){
-    int f;
+    char row[64];
+    int  pos, f;
     printf("\n  +================================================+\n");
     printf("  |          YOUR SECRET FLAG INFO                 |\n");
     printf("  +================================================+\n");
-    printf("  | COLORS  : "); f=1;
-    if(c->red)    { printf("%sRED",    f?"":", "); f=0; }
-    if(c->blue)   { printf("%sBLUE",   f?"":", "); f=0; }
-    if(c->green)  { printf("%sGREEN",  f?"":", "); f=0; }
-    if(c->yellow) { printf("%sYELLOW", f?"":", "); f=0; }
-    if(c->white)  { printf("%sWHITE",  f?"":", "); f=0; }
-    if(c->black)  { printf("%sBLACK",  f?"":", "); f=0; }
-    if(c->orange) { printf("%sORANGE", f?"":", "); f=0; }
-    if(f) printf("(none)"); printf("\n");
-    printf("  | SYMBOLS : "); f=1;
-    if(c->has_star)       { printf("%s1-Star",        f?"":", "); f=0; }
-    if(c->has_stars)      { printf("%sMulti-Stars",   f?"":", "); f=0; }
-    if(c->has_stripes)    { printf("%sStripes",        f?"":", "); f=0; }
-    if(c->has_cross)      { printf("%sCross",          f?"":", "); f=0; }
-    if(c->has_symbol)     { printf("%sSymbol/Emblem", f?"":", "); f=0; }
-    if(c->has_crescent)   { printf("%sCrescent/Moon", f?"":", "); f=0; }
-    if(c->has_sun)        { printf("%sSun",            f?"":", "); f=0; }
-    if(c->has_circle)     { printf("%sCircle/Dot",    f?"":", "); f=0; }
-    if(c->has_eagle)      { printf("%sEagle",          f?"":", "); f=0; }
-    if(c->has_dragon)     { printf("%sDragon",         f?"":", "); f=0; }
-    if(c->has_union_jack) { printf("%sUnion Jack",    f?"":", "); f=0; }
-    if(c->has_text)       { printf("%sText/Writing",  f?"":", "); f=0; }
-    if(f) printf("(none)"); printf("\n");
-    printf("  | DESIGN  : "); f=1;
-    if(c->is_tricolor)   { printf("%sTricolor (3 bands)", f?"":", "); f=0; }
-    if(c->is_bicolor)    { printf("%sBicolor (2 bands)",  f?"":", "); f=0; }
-    if(c->is_horizontal) { printf("%sHorizontal",          f?"":", "); f=0; }
-    if(c->is_vertical)   { printf("%sVertical",            f?"":", "); f=0; }
-    if(f) printf("(no band design)"); printf("\n");
-    printf("  | LOCATION: "); f=1;
-    if(c->in_asia)          { printf("%sAsia",          f?"":", "); f=0; }
-    if(c->in_europe)        { printf("%sEurope",        f?"":", "); f=0; }
-    if(c->in_africa)        { printf("%sAfrica",        f?"":", "); f=0; }
-    if(c->in_north_america) { printf("%sNorth America", f?"":", "); f=0; }
-    if(c->in_south_america) { printf("%sSouth America", f?"":", "); f=0; }
-    if(c->in_australia)     { printf("%sAustralia",     f?"":", "); f=0; }
-    if(f) printf("(unknown)"); printf("\n");
+    /* COLORS */
+    pos=0; f=1;
+    if(c->red)    { pos+=sprintf(row+pos,"%sRED",    f?"":", "); f=0; }
+    if(c->blue)   { pos+=sprintf(row+pos,"%sBLUE",   f?"":", "); f=0; }
+    if(c->green)  { pos+=sprintf(row+pos,"%sGREEN",  f?"":", "); f=0; }
+    if(c->yellow) { pos+=sprintf(row+pos,"%sYELLOW", f?"":", "); f=0; }
+    if(c->white)  { pos+=sprintf(row+pos,"%sWHITE",  f?"":", "); f=0; }
+    if(c->black)  { pos+=sprintf(row+pos,"%sBLACK",  f?"":", "); f=0; }
+    if(c->orange) { pos+=sprintf(row+pos,"%sORANGE", f?"":", "); f=0; }
+    if(f) { pos+=sprintf(row+pos,"(none)"); }
+    row[pos]='\0';
+    printf("  | COLORS  : %-37s|\n", row);
+    /* SYMBOLS */
+    pos=0; f=1;
+    if(c->has_star)       { pos+=sprintf(row+pos,"%s1-Star",        f?"":", "); f=0; }
+    if(c->has_stars)      { pos+=sprintf(row+pos,"%sMulti-Stars",   f?"":", "); f=0; }
+    if(c->has_stripes)    { pos+=sprintf(row+pos,"%sStripes",        f?"":", "); f=0; }
+    if(c->has_cross)      { pos+=sprintf(row+pos,"%sCross",          f?"":", "); f=0; }
+    if(c->has_symbol)     { pos+=sprintf(row+pos,"%sSymbol/Emblem", f?"":", "); f=0; }
+    if(c->has_crescent)   { pos+=sprintf(row+pos,"%sCrescent/Moon", f?"":", "); f=0; }
+    if(c->has_sun)        { pos+=sprintf(row+pos,"%sSun",            f?"":", "); f=0; }
+    if(c->has_circle)     { pos+=sprintf(row+pos,"%sCircle/Dot",    f?"":", "); f=0; }
+    if(c->has_eagle)      { pos+=sprintf(row+pos,"%sEagle",          f?"":", "); f=0; }
+    if(c->has_dragon)     { pos+=sprintf(row+pos,"%sDragon",         f?"":", "); f=0; }
+    if(c->has_union_jack) { pos+=sprintf(row+pos,"%sUnion Jack",    f?"":", "); f=0; }
+    if(c->has_text)       { pos+=sprintf(row+pos,"%sText/Writing",  f?"":", "); f=0; }
+    if(f) { pos+=sprintf(row+pos,"(none)"); }
+    row[pos]='\0';
+    printf("  | SYMBOLS : %-37s|\n", row);
+    /* DESIGN */
+    pos=0; f=1;
+    if(c->is_tricolor)   { pos+=sprintf(row+pos,"%sTricolor(3 bands)", f?"":", "); f=0; }
+    if(c->is_bicolor)    { pos+=sprintf(row+pos,"%sBicolor(2 bands)",  f?"":", "); f=0; }
+    if(c->is_horizontal) { pos+=sprintf(row+pos,"%sHorizontal",         f?"":", "); f=0; }
+    if(c->is_vertical)   { pos+=sprintf(row+pos,"%sVertical",           f?"":", "); f=0; }
+    if(f) { pos+=sprintf(row+pos,"(no band design)"); }
+    row[pos]='\0';
+    printf("  | DESIGN  : %-37s|\n", row);
+    /* LOCATION */
+    pos=0; f=1;
+    if(c->in_asia)          { pos+=sprintf(row+pos,"%sAsia",          f?"":", "); f=0; }
+    if(c->in_europe)        { pos+=sprintf(row+pos,"%sEurope",        f?"":", "); f=0; }
+    if(c->in_africa)        { pos+=sprintf(row+pos,"%sAfrica",        f?"":", "); f=0; }
+    if(c->in_north_america) { pos+=sprintf(row+pos,"%sNorth America", f?"":", "); f=0; }
+    if(c->in_south_america) { pos+=sprintf(row+pos,"%sSouth America", f?"":", "); f=0; }
+    if(c->in_australia)     { pos+=sprintf(row+pos,"%sAustralia",     f?"":", "); f=0; }
+    if(f) { pos+=sprintf(row+pos,"(unknown)"); }
+    row[pos]='\0';
+    printf("  | LOCATION: %-37s|\n", row);
     printf("  +================================================+\n\n");
 }
 void ask_yesno(char *out){
