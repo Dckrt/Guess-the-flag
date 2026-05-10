@@ -312,7 +312,7 @@ int main(int argc,char *argv[]){
             printf("Your secret flag: %s\n",pool[my_c].name);
             show_flag_info(&pool[my_c]);
             ask_yesno(answer);
-            snprintf(out,BUFFER_SIZE,"ANSWER|%s",answer);
+            snprintf(out,BUFFER_SIZE,"ANSWER|%.1900s",answer);
             net_send(sock,out);
         } else if(strncmp(buf,"SERVER_GUESS|",13)==0){
             char *g=buf+13;
@@ -335,7 +335,7 @@ int main(int argc,char *argv[]){
             int choice=atoi(buf);
             if(choice==99){
                 printf("Enter country name: "); fflush(stdout); read_input(buf);
-                snprintf(out,BUFFER_SIZE,"CLIENT_GUESS|%s",buf);
+                snprintf(out,BUFFER_SIZE,"CLIENT_GUESS|%.1900s",buf);
                 net_send(sock,out); net_recv(sock,buf);
                 char *res=strstr(buf,"|"); if(res)res++;
                 if(res&&strcmp(res,"correct")==0){
@@ -351,7 +351,7 @@ int main(int argc,char *argv[]){
                 if(choice==0){ printf("Type your question: "); fflush(stdout); read_input(question); }
                 else if(choice>=1&&choice<=NUM_Q){ strncpy(question,questions[choice-1],BUFFER_SIZE-1); printf("Asking: %s\n",question); }
                 else { printf("Invalid. Try again.\n"); net_send(sock,"CLIENT_QUESTION|invalid"); net_recv(sock,buf); continue; }
-                snprintf(out,BUFFER_SIZE,"CLIENT_QUESTION|%s",question);
+                snprintf(out,BUFFER_SIZE,"CLIENT_QUESTION|%.1900s",question);
                 net_send(sock,out); net_recv(sock,buf);
                 char *ans=strstr(buf,"|"); if(ans)ans++;
                 printf("[server] > %s\n",ans?ans:buf);
